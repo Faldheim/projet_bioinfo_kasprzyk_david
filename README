@@ -1,2 +1,7 @@
 # projet_bioinfo_kasprzyk_david
 Projet bioinfo S8 Santé2024 EPITA
+
+To execute the code :
+
+python3 debruijn_build.py path_of_the_file_input nb_Kmere path_of_the_file_output
+python3 debruijn_merge.py first_graph second_graph
