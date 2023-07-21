@@ -75,6 +75,10 @@ class Tree():
                 if id > prevNodeId:
                     inf_pop += 1
                 self.nodes.pop(prevNodeId)
+                if len(node.prevId) == 0:
+                    tmp = node.reverse()
+                    if len(tmp.prevId) == 1:
+                        node = tmp
                 self.nodes[id] = node
                 for i in prevId:
                     for j in range(len(self.nodes[i].prevId)):
@@ -84,47 +88,101 @@ class Tree():
                         if self.nodes[i].succId[j] == prevNodeId:
                             self.nodes[i].succId[j] = id
             
-            
-                # self.run()
-                # print("=====||=====")
-                # print(seq)
-                # print(prevId)
-                # print(succId)
-                # print(prevNodeId)
-                # print("------------")
-            # self.run()
+            while len(node.succId) == 1:
+                succNodeId = node.succId[0]
+                succNode = self.nodes[succNodeId]
+                if not id in succNode.prevId:
+                    succNode = succNode.reverse()
+                if len(succNode.succId) > 1:
+                    break
+
+                seq = f"{node.seq}{succNode.seq[len(succNode.seq)-1-max(len(succNode.seq)-len(node.seq),0):]}"
+                mult = []
+                for i in node.mult:
+                    mult.append(i)
+                for i in succNode.mult:
+                    mult.append(i)
+                succId = succNode.succId
+                prevId = node.prevId
+
+                node = Node(id,seq,mult,prevId,succId)
+                if id > succNodeId:
+                    inf_pop += 1
+                self.nodes.pop(succNodeId)
+                if len(node.succId) == 0:
+                    tmp = node.reverse()
+                    if len(tmp.succId) == 1:
+                        node = tmp
+                self.nodes[id] = node
+                for i in succId:
+                    for j in range(len(self.nodes[i].succId)):
+                        if self.nodes[i].succId[j] == succNodeId:
+                            self.nodes[i].succId[j] = id
+                    for j in range(len(self.nodes[i].prevId)):
+                        if self.nodes[i].prevId[j] == succNodeId:
+                            self.nodes[i].prevId[j] = id
+
             offset += 1 - inf_pop
-            
+        return
+
+    def rearrange(self):
+        nodes = self.nodes
+        self.nodes = {}
+        id = 0
+        for i in list(nodes):
+            self.nodes[id] = Node(id=id,seq=nodes[i].seq,mult=nodes[i].mult,prevId=nodes[i].prevId,succId=nodes[i].succId)
+            for prevId in nodes[i].prevId:
+                for j in len(nodes[prevId].prevId):
+                    if nodes[prevId].prevId[j] == nodes[i].id:
+                        nodes[prevId].prevId[j] = id
+                for j in len(nodes[prevId].succId):
+                    if nodes[prevId].succId[j] == nodes[i].id:
+                        nodes[prevId].succId[j] = id
+            for succId in nodes[i].succId:
+                for j in len(nodes[succId].prevId):
+                    if nodes[prevId].prevId[j] == nodes[i].id:
+                        nodes[prevId].prevId[j] = id
+                for j in len(nodes[prevId].succId):
+                    if nodes[prevId].succId[j] == nodes[i].id:
+                        nodes[prevId].succId[j] = id
+            id += 1
+        return     
 
     def run(self, output_file=None):
-        # file = open(output_file, 'w')
-        # file.write(f"{len(list(self.nodes))} {self.k_mere}\n")
-        print(len(list(self.nodes)), k_mere)
+        file = open(output_file, 'w')
+        file.write(f"{len(list(self.nodes))} {self.k_mere}\n")
+        # print(len(list(self.nodes)), k_mere)
         for node in list(self.nodes):
-            # id = self.nodes[node].id
-            # seq = self.nodes[node].seq
-            # mult = self.nodes[node].mult
-            # prevStr = ""
-            # for i in range(len(self.nodes[node].prevId)):
-            #     if i == 0:
-            #         prevStr = f"{self.nodes[node].prevId[i]}"
-            #     else:
-            #         prevStr = f"{self.nodes[node].prevId[i]},{prevStr}"
-            # succStr = ""
-            # for i in range(len(self.nodes[node].succId)):
-            #     if i == 0:
-            #         succStr = f"{self.nodes[node].succId[i]}"
-            #     else:
-            #         succStr = f"{self.nodes[node].succId[i]},{succStr}"
-            # file.write(f"{id} {seq} {mult} {prevStr} {succStr}\n")
-            print(
-                self.nodes[node].id,
-                self.nodes[node].seq,
-                self.nodes[node].mult,
-                self.nodes[node].prevId,
-                self.nodes[node].succId
-            )
-        # file.close()
+            id = self.nodes[node].id
+            seq = self.nodes[node].seq
+            mult = self.nodes[node].mult
+            multStr = ""
+            for i in range(len(mult)):
+                if i == 0:
+                    multStr = f"{mult[i]}"
+                else:
+                    multStr = f"{multStr},{mult[i]}"
+            prevStr = ""
+            for i in range(len(self.nodes[node].prevId)):
+                if i == 0:
+                    prevStr = f"{self.nodes[node].prevId[i]}"
+                else:
+                    prevStr = f"{self.nodes[node].prevId[i]},{prevStr}"
+            succStr = ""
+            for i in range(len(self.nodes[node].succId)):
+                if i == 0:
+                    succStr = f"{self.nodes[node].succId[i]}"
+                else:
+                    succStr = f"{self.nodes[node].succId[i]},{succStr}"
+            file.write(f"{id} {seq} {multStr} {prevStr} {succStr}\n")
+            # print(
+            #     self.nodes[node].id,
+            #     self.nodes[node].seq,
+            #     self.nodes[node].mult,
+            #     self.nodes[node].prevId,
+            #     self.nodes[node].succId
+            # )
+        file.close()
 
 # =================================================================
 
@@ -160,4 +218,5 @@ for line in file:
     tree.add_node(id,seq,mult,prevId,succId)
 
 tree.merge()
+tree.rearrange()
 tree.run(output_file=sys.argv[2])
