@@ -101,13 +101,13 @@ class Tree():
                 if i == 0:
                     prevStr = f"{self.nodes[node].prevId[i]}"
                 else:
-                    prevStr = f"{self.nodes[node].prevId[i]},{prevStr}"
+                    prevStr = f"{prevStr},{self.nodes[node].prevId[i]}"
             succStr = ""
             for i in range(len(self.nodes[node].succId)):
                 if i == 0:
                     succStr = f"{self.nodes[node].succId[i]}"
                 else:
-                    succStr = f"{self.nodes[node].succId[i]},{succStr}"
+                    succStr = f"{succStr},{self.nodes[node].succId[i]}"
             file.write(f"{id} {seq} {mult} {prevStr} {succStr}\n")
             # print(
             #     self.nodes[node].id,
